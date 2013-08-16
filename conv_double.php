@@ -4,11 +4,11 @@
  *  - usage :
  *     $ php conv_douvle.php src_file dst_file > dst_file
  */
-
+// cli check and exception setting
 if (PHP_SAPI != "cli") exit;
+error_reporting(E_ERROR);
 
 // initial settings
-error_reporting(E_ERROR);
 set_include_path(sprintf('%s%s%s%s%s', get_include_path(),
                          PATH_SEPARATOR,
                          sprintf('%s/%s', getcwd(), 'fpdi'),
@@ -23,33 +23,69 @@ define('_PAGE_SIZE_',       'A3');
 define('_PAGE_ORIENTATION_', 'L');
 define('_PAGE_UNIT_',       'mm');
 
+// return code
+define('_RET_OK_',                          0);
+define('_RET_CANNOT_OPEN_SRC_FILE_',        100);
+define('_RET_CANNOT_GET_TEMPLATE_',         101);
+define('_RET_CANNOT_SET_TEMPLATE_',         102);
+define('_RET_CANNOT_OPEN_FIRST_PAGE_',      103);
+define('_RET_CANNOT_OPEN_DEFAULT_BUFFER_',  104);
+define('_RET_CANNOT_SAVE_DST_',             105);
+
 // requirements
 require_once('tcpdf.php');
 require_once('fpdi.php');
 
+
 ///////////////////////////////////////////////////////////////////////////////
 /* main */
-
 // file settings.
 $files = get_parameters();
 
 // check margin
-$pdf = new FPDI();
-$pdf->AddPage();
-$pdf->setSourceFile($files['src']);
-$tplIdx = $pdf->importPage(1);
-$size = $pdf->useTemplate($tplIdx);
-$margin = get_margin($pdf, $size);
-unset($pfd);
+try {
+    $pdf = new FPDI();
+    $pdf->AddPage();
+    $ret = $pdf->setSourceFile($files['src']);
+    $tplIdx = $pdf->importPage(1);
+    $size = $pdf->useTemplate($tplIdx);
+    $margin = get_margin($pdf, $size);
+    unset($pfd);
+} catch (Exception $e) {
+    exit(_RET_CANNOT_OPEN_SRC_FILE_);
+}
+
 
 // reload the source and set margine
-$pdf = new FPDI(_PAGE_ORIENTATION_, _PAGE_UNIT_, _PAGE_SIZE_);
-$pdf->setPrintHeader( false );
-$pdf->AddPage();
-$pdf->setSourceFile($files['src']);
-$tplIdx = $pdf->importPage(1);
-$pdf->useTemplate($tplIdx, $margin['left'], $margin['top'],0,0,true);
-$pdf->Output($files['dst'], 'I');
+try {
+    $pdf = new FPDI(_PAGE_ORIENTATION_, _PAGE_UNIT_, _PAGE_SIZE_);
+    $pdf->setPrintHeader( false );
+    $pdf->AddPage();
+} catch (Exception $e) {
+    exit(_RET_CANNOT_OPEN_DEFAULT_BUFFER_);
+}
+try {
+    $ret = @$pdf->setSourceFile($files['src']);
+} catch (Exception $e) {
+    exit(_RET_CANNOT_OPEN_SRC_FILE_);
+}
+try {
+    $tplIdx = $pdf->importPage(1);
+} catch (Exception $e) {
+    exit(_RET_CANNOT_OPEN_FIRST_PAGE_);
+}
+try {
+    $ret = $pdf->useTemplate($tplIdx, $margin['left'], $margin['top'],0,0,true);
+} catch (Exception $e) {
+    exit(_RET_CANNOT_SET_TEMPLATE_);
+}
+try {
+    $ret = $pdf->Output($files['dst'], 'F');
+} catch (Exception $e) {
+    exit(_RET_CANNOT_SAVE_DST_);
+}
+exit(_RET_OK_);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
