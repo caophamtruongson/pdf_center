@@ -111,7 +111,7 @@ function get_margin($pdf, array $size)
 function get_parameters()
 {
     if ( !isset($_SERVER['argc']) or $_SERVER['argc'] !== 3 ) {
-        echo "Error: wrong parametes.\nUsage: $ conv.php srcfile dstfile > dstfile\n";
+        echo "Error: wrong parametes.\nUsage: $ conv.php srcfile dstfil\n";
         exit;
     }
     return array('src' => $_SERVER['argv'][1],
