@@ -5,15 +5,16 @@
  *     $ php conv_douvle.php src_file dst_file > dst_file
  */
 // cli check and exception setting
-if (PHP_SAPI != "cli") exit;
+if (PHP_SAPI != "cli") exit(200);
 error_reporting(E_ERROR);
 
 // initial settings
+$_path = sprintf("%s", dirname(__FILE__));
 set_include_path(sprintf('%s%s%s%s%s', get_include_path(),
                          PATH_SEPARATOR,
-                         sprintf('%s/%s', getcwd(), 'fpdi'),
+                         sprintf('%s%s%s', $_path, DIRECTORY_SEPARATOR, 'fpdi'),
                          PATH_SEPARATOR,
-                         sprintf('%s/%s', getcwd(), 'tcpdf')));
+                         sprintf('%s%s%s', $_path, DIRECTORY_SEPARATOR, 'tcpdf')));
 
 // definitions
 define('_A3L_WIDTH_',        420);
@@ -35,7 +36,6 @@ define('_RET_CANNOT_SAVE_DST_',             105);
 // requirements
 require_once('tcpdf.php');
 require_once('fpdi.php');
-
 
 ///////////////////////////////////////////////////////////////////////////////
 /* main */
