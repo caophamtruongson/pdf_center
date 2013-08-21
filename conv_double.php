@@ -4,7 +4,7 @@
  *  - usage :
  *     $ php conv_douvle.php src_file dst_file > dst_file
  */
-// cli check and exception setting
+// cli check and exception setting.
 if (PHP_SAPI != "cli") exit(200);
 error_reporting(E_ERROR);
 
